@@ -16,7 +16,7 @@ class GoogleNewsURLDumper:
             yield url
 
     def _check_search_string(self):
-        req = requests.get(self.url, params=self.params, headers=self.headers, proxies=self.proxy)
+        req = requests.get(self.url, params=self.params, headers=self.headers)
         for x in self._get_data(req.text):
             if not x:
                 return False
@@ -51,7 +51,7 @@ class GoogleNewsURLDumper:
             data = ''
             flag = True
             while flag:
-                req_text = s.get(self.url, params=self.params, headers=self.headers, proxies=self.proxy).text
+                req_text = s.get(self.url, params=self.params, headers=self.headers).text
                 for url in self._get_data(req_text):
                     if not url:
                         flag = False
