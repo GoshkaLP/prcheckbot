@@ -148,8 +148,8 @@ def text_handler(message):
                              parse_mode='Markdown')
 
 
-bot.set_webhook('https://3f4af1be1a35.ngrok.io/{}'.format(secret))
-app.run(host='0.0.0.0', port=80)
-# bot.set_webhook('https://prcheckbot.herokuapp.com/{}'.format(secret))
-# app.run(host='0.0.0.0', port=getenv('PORT'))
+# bot.set_webhook('https://3f4af1be1a35.ngrok.io/{}'.format(secret))
+# app.run(host='0.0.0.0', port=80)
+bot.set_webhook('https://prcheckbot.herokuapp.com/{}'.format(secret))
+app.run(host='0.0.0.0', port=getenv('PORT'))
 
