@@ -28,6 +28,7 @@ class GoogleNewsURLDumper:
     def _get_data(self, request_text):
         soup = BeautifulSoup(request_text, 'lxml')
         data = soup.find_all('div', id='main')
+        print(data)
         if not data:
             yield None
         for elem in data.find_all('div')[2:]:
@@ -36,7 +37,6 @@ class GoogleNewsURLDumper:
 
     def _check_search_string(self):
         req = requests.get(self.url, params=self.params, headers=self.headers)
-        print(paste_config('paste', req.text))
         for x in self._get_data(req.text):
             if not x:
                 return False
