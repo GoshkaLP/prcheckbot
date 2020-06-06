@@ -48,6 +48,7 @@ class GoogleNewsURLDumper:
             flag = True
             while flag:
                 req_text = s.get(self.url, params=self.params, headers=self.headers).text
+                print(req_text)
                 for url in self._get_data(req_text):
                     if not url:
                         flag = False
