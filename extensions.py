@@ -59,6 +59,8 @@ class GoogleNewsURLDumper:
                     data += '{}\n'.format(url)
                 self.params['start'] += 10
                 sleep(2)
+            if not data:
+                raise ValueError('Too many requests')
             return BytesIO(data.encode())
 
 
