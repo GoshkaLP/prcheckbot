@@ -27,7 +27,7 @@ def paste_config(option, text=None, code=None):
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
         soup = BeautifulSoup(request_text, 'lxml')
-        data = soup.find_all('div', id='main')
+        data = soup.find('div', id='main')
         print(data)
         if not data:
             yield None
