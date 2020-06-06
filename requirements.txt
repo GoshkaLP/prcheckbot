@@ -5,3 +5,4 @@ Flask-SQLAlchemy>=2.4.1
 pyTelegramBotAPI>=3.7.1
 psycopg2>=2.8.5
 requests>=2.7.0
+lxml>=4.5.1
