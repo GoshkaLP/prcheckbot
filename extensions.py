@@ -7,6 +7,7 @@ from io import BytesIO
 
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
+        print(request_text)
         soup = BeautifulSoup(request_text, 'lxml')
         if soup.find('div', class_='g-recaptcha'):
             raise ValueError('Too many requests')
