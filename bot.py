@@ -26,7 +26,7 @@ class Users(db.Model):
 
 @app.route('/ping', methods=['GET', 'HEAD'])
 def ping_handler():
-    return 200
+    return 'ok', 200
 
 
 @app.route('/{}'.format(secret), methods=['POST'])
