@@ -1,5 +1,5 @@
-from requests import Session
 import requests
+from requests import Session
 from bs4 import BeautifulSoup
 from time import sleep, strptime
 from io import BytesIO
@@ -8,11 +8,11 @@ from io import BytesIO
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
         soup = BeautifulSoup(request_text, 'lxml')
-        data = soup.find_all('g-card', class_=True)
+        data = soup.find_all('div', id='main')
         if not data:
             yield None
-        for ts in data:
-            url = ts.find('a')['href']
+        for elem in data.find_all('div')[2:]:
+            url = elem['href'][7:]
             yield url
 
     def _check_search_string(self):
@@ -33,7 +33,6 @@ class GoogleNewsURLDumper:
                 (lambda after: '' if not after else 'after:{}'.format(after))(after),
                 (lambda before: '' if not before else 'before:{}'.format(before))(before)
             ),
-            'source': 'lnms',
             'tbm': 'nws',
             'start': 0,
             'hl': 'ru',
@@ -41,7 +40,13 @@ class GoogleNewsURLDumper:
         }
         self.headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-                          'Chrome/70.0.3538.77 Safari/537.36'
+                          'Chrome/70.0.3538.77 Safari/537.36',
+            'Cookie': 'CGIC=IgMqLyo; '
+                      '1P_JAR=2020-06-06-20; '
+                      'NID=204=phrZMV6C1pk1e34P2JlDhe_'
+                      '4jxUPa5N0YfZHoCMGWf7IkRelYkBkN6PPV4eqS27lBktHz'
+                      'SWTC6xnqUJEVQQ0qC0dDanrpe-2fpRcV9luZfZ8_VdOFLv9'
+                      'OBp5ixmPpNKOUez3-cMyXD3jAg1uchenXt4wM_uHmTRA5p6YQKIlDl8'
         }
         if not self._check_search_string():
             raise ValueError('Wrong search string')
@@ -58,7 +63,7 @@ class GoogleNewsURLDumper:
                         break
                     data += '{}\n'.format(url)
                 self.params['start'] += 10
-                sleep(1)
+                sleep(2)
             return BytesIO(data.encode())
 
 
