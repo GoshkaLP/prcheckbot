@@ -8,6 +8,8 @@ from io import BytesIO
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
         soup = BeautifulSoup(request_text, 'lxml')
+        if soup.find('div', class_='g-recaptcha'):
+            raise ValueError('Too many requests')
         data = soup.find_all('div', class_='ts')
         if not data:
             yield None
@@ -17,9 +19,6 @@ class GoogleNewsURLDumper:
 
     def _check_search_string(self):
         req = requests.get(self.url, params=self.params, headers=self.headers)
-        print(req.text)
-        if req.status_code == '429':
-            raise ValueError('Too many requests')
         for x in self._get_data(req.text):
             if not x:
                 return False
@@ -43,12 +42,6 @@ class GoogleNewsURLDumper:
         self.headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
                           'Chrome/70.0.3538.77 Safari/537.36'
-            # 'Cookie': 'CGIC=IgMqLyo; '
-            #           '1P_JAR=2020-06-06-20; '
-            #           'NID=204=phrZMV6C1pk1e34P2JlDhe_'
-            #           '4jxUPa5N0YfZHoCMGWf7IkRelYkBkN6PPV4eqS27lBktHz'
-            #           'SWTC6xnqUJEVQQ0qC0dDanrpe-2fpRcV9luZfZ8_VdOFLv9'
-            #           'OBp5ixmPpNKOUez3-cMyXD3jAg1uchenXt4wM_uHmTRA5p6YQKIlDl8'
         }
         if not self._check_search_string():
             raise ValueError('Wrong search string')
@@ -59,8 +52,6 @@ class GoogleNewsURLDumper:
             flag = True
             while flag:
                 req = s.get(self.url, params=self.params, headers=self.headers)
-                if req.status_code == '429':
-                    raise ValueError('Too many requests')
                 for url in self._get_data(req.text):
                     if not url:
                         flag = False
