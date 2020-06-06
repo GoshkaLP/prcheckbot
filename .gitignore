@@ -1,4 +1,2 @@
 .idea/
 __pycache__/
-main.conf
-docker-compose.yml
