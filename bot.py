@@ -141,8 +141,14 @@ def text_handler(message):
             except ValueError as e:
                 if str(e) == 'Too many requests':
                     bot.send_message(chat_id, text='*Произошла ошибка!*\n'
-                                                   '*Превышено количество запросов в Google!\nПодождите немного!*',
+                                                   'Превышено количество запросов в Google!\nПодождите немного!',
                                      parse_mode='Markdown')
+                elif str(e) == 'Empty file':
+                    bot.send_message(chat_id, text='*Произошла ошибка!*\n'
+                                                   'Не удалось выгрузить ссылки с поисковика.\n'
+                                                   'Такое бывает, когда Google обрывает запрос.\n'
+                                                   'Попробуйте еще раз')
+
         elif check_date(before_date):
             user_upd_obj.update({'mes_status': 3, 'before_date': before_date})
             db.session.commit()
@@ -157,6 +163,11 @@ def text_handler(message):
                     bot.send_message(chat_id, text='*Произошла ошибка!*\n'
                                                    '*Превышено количество запросов в Google!\nПодождите немного!*',
                                      parse_mode='Markdown')
+                elif str(e) == 'Empty file':
+                    bot.send_message(chat_id, text='*Произошла ошибка!*\n'
+                                                   'Не удалось выгрузить ссылки с поисковика.\n'
+                                                   'Такое бывает, когда Google обрывает запрос.\n'
+                                                   'Попробуйте еще раз')
         else:
             bot.send_message(chat_id, text='Вы ввели *неправильный* формат даты или не ответили *Нет*\n'
                                            'Попробуйте еще раз',

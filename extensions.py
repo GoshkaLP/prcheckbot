@@ -13,7 +13,9 @@ class GoogleNewsURLDumper:
             raise ValueError('Too many requests')
         data = soup.find_all('div', class_='ts')
         if not data:
-            yield None
+            data = soup.find_all('g-card')
+            if not data:
+                yield None
         for elem in data:
             url = elem.find('a', href=True)['href']
             yield url
@@ -61,7 +63,7 @@ class GoogleNewsURLDumper:
                 self.params['start'] += 10
                 sleep(2)
             if not data:
-                raise ValueError('Too many requests')
+                raise ValueError('Empty file')
             return BytesIO(data.encode())
 
 
