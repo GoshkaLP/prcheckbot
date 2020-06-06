@@ -90,18 +90,18 @@ def text_handler(message):
     if user_obj.mes_status == 0:
         search_string = message.text
         print(search_string)
-        try:
-            GoogleNewsURLDumper(search_string)
-            user_upd_obj.update({'search_string': search_string, 'mes_status': 1})
-            db.session.commit()
-            bot.send_message(chat_id, text='Отправьте дату, *с момента которой хотите получить ссылки*\n'
-                                           'Или отправьте *Нет*, если не хотите указывать данный параметр\n'
-                                           'Формат ввода даты: `YYYY-MM-DD`',
-                             parse_mode='Markdown')
-        except ValueError as e:
-            print(e)
-            bot.send_message(chat_id, text='*По данному запросу не было найдено ссылок!*',
-                             parse_mode='Markdown')
+        # try:
+        GoogleNewsURLDumper(search_string)
+        user_upd_obj.update({'search_string': search_string, 'mes_status': 1})
+        db.session.commit()
+        bot.send_message(chat_id, text='Отправьте дату, *с момента которой хотите получить ссылки*\n'
+                                       'Или отправьте *Нет*, если не хотите указывать данный параметр\n'
+                                       'Формат ввода даты: `YYYY-MM-DD`',
+                         parse_mode='Markdown')
+        # except ValueError as e:
+        #     print(e)
+        #     bot.send_message(chat_id, text='*По данному запросу не было найдено ссылок!*',
+        #                      parse_mode='Markdown')
 
     elif user_obj.mes_status == 1:
         after_date = message.text
