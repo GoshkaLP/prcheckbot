@@ -98,12 +98,10 @@ def text_handler(message):
                                            'Формат ввода даты: `YYYY-MM-DD`',
                              parse_mode='Markdown')
         except ValueError as e:
-            print(e)
-            print(type(e))
-            if e == 'Wrong search string':
+            if str(e) == 'Wrong search string':
                 bot.send_message(chat_id, text='*По данному запросу не было найдено ссылок!*',
                                  parse_mode='Markdown')
-            elif e == 'Too many requests':
+            elif str(e) == 'Too many requests':
                 bot.send_message(chat_id, text='*Превышено количество запросов в Google!\nПодождите немного!*',
                                  parse_mode='Markdown')
 
@@ -139,7 +137,7 @@ def text_handler(message):
             try:
                 start_dumping(chat_id, user_id)
             except ValueError as e:
-                if e == 'Too many requests':
+                if str(e) == 'Too many requests':
                     bot.send_message(chat_id, text='*Превышено количество запросов в Google!\nПодождите немного!*',
                                      parse_mode='Markdown')
         elif check_date(before_date):
@@ -149,7 +147,7 @@ def text_handler(message):
             try:
                 start_dumping(chat_id, user_id)
             except ValueError as e:
-                if e == 'Too many requests':
+                if str(e) == 'Too many requests':
                     bot.send_message(chat_id, text='*Превышено количество запросов в Google!\nПодождите немного!*',
                                      parse_mode='Markdown')
         else:
