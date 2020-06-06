@@ -97,7 +97,8 @@ def text_handler(message):
                                            'Или отправьте *Нет*, если не хотите указывать данный параметр\n'
                                            'Формат ввода даты: `YYYY-MM-DD`',
                              parse_mode='Markdown')
-        except ValueError:
+        except ValueError as e:
+            print(e)
             bot.send_message(chat_id, text='*По данному запросу не было найдено ссылок!*',
                              parse_mode='Markdown')
 
