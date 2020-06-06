@@ -61,20 +61,10 @@ def find_handler(message):
     if not user_obj:
         db.session.add(Users(user_id=user_id, mes_status=0))
         db.session.commit()
-        user_obj = Users.query.filter_by(user_id=message.from_user.id).first()
 
-    if user_obj.mes_status == 0:
-        bot.send_message(chat_id, text='Отправьте поисковой запрос следующим сообщением')
-    elif user_obj.mes_status == 1:
-        bot.send_message(chat_id, text='Отправьте дату, *с которой хотите получить ссылки*\n'
-                                       'Или отправьте *Нет*, если не хотите указывать данный параметр\n'
-                                       'Формат ввода даты: `YYYY-MM-DD`',
-                         parse_mode='Markdown')
-    elif user_obj.mes_status == 2:
-        bot.send_message(chat_id, text='Отправьте дату, *по которую хотите получить ссылки*\n'
-                                       'Или отправьте *Нет*, если не хотите указывать данный параметр\n'
-                                       'Формат ввода даты: `YYYY-MM-DD`',
-                         parse_mode='Markdown')
+    Users.query.filter_by(user_id=user_id).update({'mes_status': 0})
+
+    bot.send_message(chat_id, text='Отправьте поисковой запрос следующим сообщением')
 
 
 def start_dumping(chat_id, user_id):
@@ -117,6 +107,10 @@ def text_handler(message):
         if after_date == 'Нет':
             user_upd_obj.update({'mes_status': 2})
             db.session.commit()
+            bot.send_message(chat_id, text='Отправьте дату, *по момент которой хотите получить ссылки*\n'
+                                           'Или отправьте *Нет*, если не хотите указывать данный параметр\n'
+                                           'Формат ввода даты: `YYYY-MM-DD`',
+                             parse_mode='Markdown')
         elif check_date(after_date):
             user_upd_obj.update({'mes_status': 2, 'after_date': after_date})
             db.session.commit()
@@ -148,8 +142,8 @@ def text_handler(message):
                              parse_mode='Markdown')
 
 
-# bot.set_webhook('https://3f4af1be1a35.ngrok.io/{}'.format(secret))
-# app.run(host='0.0.0.0', port=80)
-bot.set_webhook('https://prcheckbot.herokuapp.com/{}'.format(secret))
-app.run(host='0.0.0.0', port=getenv('PORT'))
+bot.set_webhook('https://3f4af1be1a35.ngrok.io/{}'.format(secret))
+app.run(host='0.0.0.0', port=80)
+# bot.set_webhook('https://prcheckbot.herokuapp.com/{}'.format(secret))
+# app.run(host='0.0.0.0', port=getenv('PORT'))
 

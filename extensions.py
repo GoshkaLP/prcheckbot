@@ -5,38 +5,8 @@ from time import sleep, strptime
 from io import BytesIO
 
 
-def paste_config(option, text=None, code=None):
-    api_dev_key = '137511a516aab817743d7c0e0a4de528'
-    api_user_key = 'd99e1aa5ee7fba779e5d4286086de3a8'
-    url = 'https://pastebin.com/api/api_post.php'
-    data = {
-        'api_dev_key': api_dev_key,
-        'api_option': option,
-        'api_user_key': api_user_key
-    }
-    if option == 'paste':
-        data['api_paste_expire_date'] = '2W'
-        data['api_paste_private'] = '1'
-        data['api_paste_code'] = text
-        req = requests.post(url, data=data)
-        code = req.text[-req.text[::-1].index('/'):]
-        return code
-    elif option == 'delete':
-        data['api_paste_key'] = code
-        requests.post(url, data=data)
-
-
-def get_paste(code):
-    url = 'https://pastebin.com/raw/'+code
-    req = requests.get(url)
-    return req.text
-
-
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
-        #
-        print(paste_config('paste', request_text))
-        #
         soup = BeautifulSoup(request_text, 'lxml')
         data = soup.find_all('div', class_='ts')
         if not data:
@@ -50,10 +20,13 @@ class GoogleNewsURLDumper:
         for x in self._get_data(req.text):
             if not x:
                 return False
+            else:
+                break
         return True
 
     def __init__(self, search_string, after=None, before=None):
         self.url = 'https://www.google.ru/search'
+        self.proxy = {'https': 'http://23.111.204.159:3128'}
         self.params = {
             'q': '{} {} {}'.format(
                 search_string,
@@ -63,7 +36,8 @@ class GoogleNewsURLDumper:
             'source': 'lnms',
             'tbm': 'nws',
             'start': 0,
-            'newwindow': 1
+            'hl': 'ru',
+            'gl': 'ru'
         }
         self.headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
