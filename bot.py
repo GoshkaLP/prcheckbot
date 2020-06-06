@@ -64,7 +64,7 @@ def find_handler(message):
 
     Users.query.filter_by(user_id=user_id).update({'mes_status': 0})
 
-    bot.send_message(chat_id, text='Отправьте поисковой запрос следующим сообщением')
+    bot.send_message(chat_id, text='Отправьте поисковый запрос следующим сообщением')
 
 
 def start_dumping(chat_id, user_id):
@@ -133,22 +133,30 @@ def text_handler(message):
         if before_date.lower() == 'нет':
             user_upd_obj.update({'mes_status': 3})
             db.session.commit()
-            bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...')
+            bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...\n'
+                                           'Между переключениями страниц стоит задержка 2с, чтобы'
+                                           '`Google` не банил за спам',
+                             parse_mode='Markdown')
             try:
                 start_dumping(chat_id, user_id)
             except ValueError as e:
                 if str(e) == 'Too many requests':
-                    bot.send_message(chat_id, text='*Превышено количество запросов в Google!\nПодождите немного!*',
+                    bot.send_message(chat_id, text='*Произошла ошибка!*\n'
+                                                   '*Превышено количество запросов в Google!\nПодождите немного!*',
                                      parse_mode='Markdown')
         elif check_date(before_date):
             user_upd_obj.update({'mes_status': 3, 'before_date': before_date})
             db.session.commit()
-            bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...')
+            bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...\n'
+                                           'Между переключениями страниц стоит задержка 2с, чтобы'
+                                           '`Google` не банил за спам',
+                             parse_mode='Markdown')
             try:
                 start_dumping(chat_id, user_id)
             except ValueError as e:
                 if str(e) == 'Too many requests':
-                    bot.send_message(chat_id, text='*Превышено количество запросов в Google!\nПодождите немного!*',
+                    bot.send_message(chat_id, text='*Произошла ошибка!*\n'
+                                                   '*Превышено количество запросов в Google!\nПодождите немного!*',
                                      parse_mode='Markdown')
         else:
             bot.send_message(chat_id, text='Вы ввели *неправильный* формат даты или не ответили *Нет*\n'
