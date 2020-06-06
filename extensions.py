@@ -8,7 +8,7 @@ from io import BytesIO
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
         soup = BeautifulSoup(request_text, 'lxml')
-        data = soup.find_all('div', class_='ts')
+        data = soup.find_all('g-card', class_=True)
         if not data:
             yield None
         for ts in data:
