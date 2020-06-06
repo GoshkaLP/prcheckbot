@@ -3,6 +3,7 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 import telebot
 from extensions import GoogleNewsURLDumper, check_date
+from os import getenv
 
 token = '1121674909:AAETzxZPRT-rGziD-AWbfC7EpFTTEf3NY4E'
 app = Flask(__name__)
@@ -149,4 +150,4 @@ def text_handler(message):
 
 # bot.set_webhook('https://362e2c854f89.ngrok.io/{}'.format(secret))
 bot.set_webhook('https://prcheckbot.herokuapp.com/{}'.format(secret))
-app.run(host='0.0.0.0', port=80)
+app.run(host='0.0.0.0', port=getenv('PORT'))
