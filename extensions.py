@@ -27,13 +27,11 @@ def paste_config(option, text=None, code=None):
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
         soup = BeautifulSoup(request_text, 'lxml')
-        data = soup.find('div', id='main')
-        print(data)
+        data = soup.find_all('div', id='ts')
         if not data:
             yield None
-        for elem in data.find_all('div'):
-            print(elem)
-            url = elem.find('a', href=True)['href'][7:]
+        for elem in data:
+            url = elem.find('a', href=True)['href']
             yield url
 
     def _check_search_string(self):
@@ -47,7 +45,6 @@ class GoogleNewsURLDumper:
 
     def __init__(self, search_string, after=None, before=None):
         self.url = 'https://www.google.ru/search'
-        self.proxy = {'https': 'http://23.111.204.159:3128'}
         self.params = {
             'q': '{} {} {}'.format(
                 search_string,
