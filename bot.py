@@ -89,19 +89,21 @@ def text_handler(message):
     user_upd_obj = Users.query.filter_by(user_id=user_id)
     if user_obj.mes_status == 0:
         search_string = message.text
-        print(search_string)
-        # try:
-        GoogleNewsURLDumper(search_string)
-        user_upd_obj.update({'search_string': search_string, 'mes_status': 1})
-        db.session.commit()
-        bot.send_message(chat_id, text='Отправьте дату, *с момента которой хотите получить ссылки*\n'
-                                       'Или отправьте *Нет*, если не хотите указывать данный параметр\n'
-                                       'Формат ввода даты: `YYYY-MM-DD`',
-                         parse_mode='Markdown')
-        # except ValueError as e:
-        #     print(e)
-        #     bot.send_message(chat_id, text='*По данному запросу не было найдено ссылок!*',
-        #                      parse_mode='Markdown')
+        try:
+            GoogleNewsURLDumper(search_string)
+            user_upd_obj.update({'search_string': search_string, 'mes_status': 1})
+            db.session.commit()
+            bot.send_message(chat_id, text='Отправьте дату, *с момента которой хотите получить ссылки*\n'
+                                           'Или отправьте *Нет*, если не хотите указывать данный параметр\n'
+                                           'Формат ввода даты: `YYYY-MM-DD`',
+                             parse_mode='Markdown')
+        except ValueError as e:
+            if e == 'Wrong search string':
+                bot.send_message(chat_id, text='*По данному запросу не было найдено ссылок!*',
+                                 parse_mode='Markdown')
+            elif e == 'Too many requests':
+                bot.send_message(chat_id, text='*Превышено количество запросов в Google!\nПодождите немного!*',
+                                 parse_mode='Markdown')
 
     elif user_obj.mes_status == 1:
         after_date = message.text
@@ -132,12 +134,22 @@ def text_handler(message):
             user_upd_obj.update({'mes_status': 3})
             db.session.commit()
             bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...')
-            start_dumping(chat_id, user_id)
+            try:
+                start_dumping(chat_id, user_id)
+            except ValueError as e:
+                if e == 'Too many requests':
+                    bot.send_message(chat_id, text='*Превышено количество запросов в Google!\nПодождите немного!*',
+                                     parse_mode='Markdown')
         elif check_date(before_date):
             user_upd_obj.update({'mes_status': 3, 'before_date': before_date})
             db.session.commit()
             bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...')
-            start_dumping(chat_id, user_id)
+            try:
+                start_dumping(chat_id, user_id)
+            except ValueError as e:
+                if e == 'Too many requests':
+                    bot.send_message(chat_id, text='*Превышено количество запросов в Google!\nПодождите немного!*',
+                                     parse_mode='Markdown')
         else:
             bot.send_message(chat_id, text='Вы ввели *неправильный* формат даты или не ответили *Нет*\n'
                                            'Попробуйте еще раз',

@@ -17,6 +17,8 @@ class GoogleNewsURLDumper:
 
     def _check_search_string(self):
         req = requests.get(self.url, params=self.params, headers=self.headers)
+        if req.status_code == '429':
+            raise ValueError('Too many requests')
         for x in self._get_data(req.text):
             if not x:
                 return False
@@ -55,8 +57,10 @@ class GoogleNewsURLDumper:
             data = ''
             flag = True
             while flag:
-                req_text = s.get(self.url, params=self.params, headers=self.headers).text
-                for url in self._get_data(req_text):
+                req = s.get(self.url, params=self.params, headers=self.headers)
+                if req.status_code == '429':
+                    raise ValueError('Too many requests')
+                for url in self._get_data(req.text):
                     if not url:
                         flag = False
                         break
