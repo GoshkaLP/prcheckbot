@@ -4,6 +4,25 @@ from bs4 import BeautifulSoup
 from time import sleep, strptime
 from io import BytesIO
 
+def paste_config(option, text=None, code=None):
+    api_dev_key = '137511a516aab817743d7c0e0a4de528'
+    api_user_key = 'd99e1aa5ee7fba779e5d4286086de3a8'
+    url = 'https://pastebin.com/api/api_post.php'
+    data = {
+        'api_dev_key': api_dev_key,
+        'api_option': option,
+        'api_user_key': api_user_key
+    }
+    if option == 'paste':
+        data['api_paste_expire_date'] = '2W'
+        data['api_paste_private'] = '1'
+        data['api_paste_code'] = text
+        req = requests.post(url, data=data)
+        code = req.text[-req.text[::-1].index('/'):]
+        return code
+    elif option == 'delete':
+        data['api_paste_key'] = code
+        requests.post(url, data=data)
 
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
@@ -17,7 +36,7 @@ class GoogleNewsURLDumper:
 
     def _check_search_string(self):
         req = requests.get(self.url, params=self.params, headers=self.headers)
-        print(req.text)
+        print(paste_config('paste', req.text))
         for x in self._get_data(req.text):
             if not x:
                 return False
