@@ -72,8 +72,6 @@ def start_dumping(chat_id, user_id):
     dump_data = GoogleNewsURLDumper(user_obj.search_string, user_obj.after_date, user_obj.before_date).dump()
     caption = 'По вашему поисковому запросу новостные ссылки были успешно сохранены в файл'
     bot.send_document(chat_id, data=('file.txt', dump_data), caption=caption)
-    Users.query.filter_by(user_id=user_id).update({'mes_status': 0})
-    db.session.commit()
 
 
 @bot.message_handler(content_types=['text'])
@@ -163,6 +161,10 @@ def text_handler(message):
             bot.send_message(chat_id, text='Вы ввели *неправильный* формат даты или не ответили *Нет*\n'
                                            'Попробуйте еще раз',
                              parse_mode='Markdown')
+
+    elif user_obj.mes_status == 3:
+        bot.send_message(chat_id, text='Неверная команда!\nНапишите `/help` для получения справки.',
+                         parse_mode='Markdown')
 
 
 # bot.set_webhook('https://3f4af1be1a35.ngrok.io/{}'.format(secret))
