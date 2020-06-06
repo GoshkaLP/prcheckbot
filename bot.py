@@ -63,6 +63,7 @@ def find_handler(message):
         db.session.commit()
 
     Users.query.filter_by(user_id=user_id).update({'mes_status': 0})
+    db.session.commit()
 
     bot.send_message(chat_id, text='Отправьте поисковый запрос следующим сообщением')
 
@@ -161,7 +162,7 @@ def text_handler(message):
             except ValueError as e:
                 if str(e) == 'Too many requests':
                     bot.send_message(chat_id, text='*Произошла ошибка!*\n'
-                                                   '*Превышено количество запросов в Google!\nПодождите немного!*',
+                                                   'Превышено количество запросов в Google!\nПодождите немного!',
                                      parse_mode='Markdown')
                 elif str(e) == 'Empty file':
                     bot.send_message(chat_id, text='*Произошла ошибка!*\n'
