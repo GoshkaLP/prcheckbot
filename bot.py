@@ -89,6 +89,7 @@ def text_handler(message):
     user_upd_obj = Users.query.filter_by(user_id=user_id)
     if user_obj.mes_status == 0:
         search_string = message.text
+        print(search_string)
         try:
             GoogleNewsURLDumper(search_string)
             user_upd_obj.update({'search_string': search_string, 'mes_status': 1})
