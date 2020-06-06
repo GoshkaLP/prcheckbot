@@ -17,6 +17,7 @@ class GoogleNewsURLDumper:
 
     def _check_search_string(self):
         req = requests.get(self.url, params=self.params, headers=self.headers)
+        print(req.text)
         for x in self._get_data(req.text):
             if not x:
                 return False
