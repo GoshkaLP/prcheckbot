@@ -7,10 +7,8 @@ from io import BytesIO
 
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
-        print(request_text)
         soup = BeautifulSoup(request_text, 'lxml')
         data = soup.find_all('div', class_='ts')
-        print(data)
         if not data:
             yield None
         for elem in data:
@@ -19,7 +17,6 @@ class GoogleNewsURLDumper:
 
     def _check_search_string(self):
         req = requests.get(self.url, params=self.params, headers=self.headers)
-        print(req.status_code)
         if req.status_code == '429':
             raise ValueError('Too many requests')
         for x in self._get_data(req.text):

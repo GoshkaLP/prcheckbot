@@ -136,7 +136,7 @@ def text_handler(message):
             db.session.commit()
             bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...\n'
                                            'Между переключениями страниц стоит задержка 2с, чтобы'
-                                           '`Google` не банил за спам',
+                                           ' `Google` не банил за спам',
                              parse_mode='Markdown')
             try:
                 start_dumping(chat_id, user_id)
@@ -150,7 +150,7 @@ def text_handler(message):
             db.session.commit()
             bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...\n'
                                            'Между переключениями страниц стоит задержка 2с, чтобы'
-                                           '`Google` не банил за спам',
+                                           ' `Google` не банил за спам',
                              parse_mode='Markdown')
             try:
                 start_dumping(chat_id, user_id)
