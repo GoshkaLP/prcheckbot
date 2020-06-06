@@ -104,7 +104,7 @@ def text_handler(message):
     elif user_obj.mes_status == 1:
         after_date = message.text
 
-        if after_date == 'Нет':
+        if after_date.lower() == 'нет':
             user_upd_obj.update({'mes_status': 2})
             db.session.commit()
             bot.send_message(chat_id, text='Отправьте дату, *по момент которой хотите получить ссылки*\n'
@@ -126,7 +126,7 @@ def text_handler(message):
     elif user_obj.mes_status == 2:
         before_date = message.text
 
-        if before_date == 'Нет':
+        if before_date.lower() == 'нет':
             user_upd_obj.update({'mes_status': 3})
             db.session.commit()
             bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...')
@@ -142,8 +142,8 @@ def text_handler(message):
                              parse_mode='Markdown')
 
 
-bot.set_webhook('https://3f4af1be1a35.ngrok.io/{}'.format(secret))
-app.run(host='0.0.0.0', port=80)
-# bot.set_webhook('https://prcheckbot.herokuapp.com/{}'.format(secret))
-# app.run(host='0.0.0.0', port=getenv('PORT'))
+# bot.set_webhook('https://3f4af1be1a35.ngrok.io/{}'.format(secret))
+# app.run(host='0.0.0.0', port=80)
+bot.set_webhook('https://prcheckbot.herokuapp.com/{}'.format(secret))
+app.run(host='0.0.0.0', port=getenv('PORT'))
 
