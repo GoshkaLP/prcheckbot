@@ -98,6 +98,8 @@ def text_handler(message):
                                            'Формат ввода даты: `YYYY-MM-DD`',
                              parse_mode='Markdown')
         except ValueError as e:
+            print(e)
+            print(type(e))
             if e == 'Wrong search string':
                 bot.send_message(chat_id, text='*По данному запросу не было найдено ссылок!*',
                                  parse_mode='Markdown')
