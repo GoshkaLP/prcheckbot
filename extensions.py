@@ -32,7 +32,7 @@ class GoogleNewsURLDumper:
         if not data:
             yield None
         for elem in data.find_all('div')[2:]:
-            url = elem['href'][7:]
+            url = elem.find_all('a')[0]['href'][7:]
             yield url
 
     def _check_search_string(self):
