@@ -19,6 +19,7 @@ class GoogleNewsURLDumper:
 
     def _check_search_string(self):
         req = requests.get(self.url, params=self.params, headers=self.headers)
+        print(req.status_code)
         if req.status_code == '429':
             raise ValueError('Too many requests')
         for x in self._get_data(req.text):
@@ -43,13 +44,13 @@ class GoogleNewsURLDumper:
         }
         self.headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-                          'Chrome/70.0.3538.77 Safari/537.36',
-            'Cookie': 'CGIC=IgMqLyo; '
-                      '1P_JAR=2020-06-06-20; '
-                      'NID=204=phrZMV6C1pk1e34P2JlDhe_'
-                      '4jxUPa5N0YfZHoCMGWf7IkRelYkBkN6PPV4eqS27lBktHz'
-                      'SWTC6xnqUJEVQQ0qC0dDanrpe-2fpRcV9luZfZ8_VdOFLv9'
-                      'OBp5ixmPpNKOUez3-cMyXD3jAg1uchenXt4wM_uHmTRA5p6YQKIlDl8'
+                          'Chrome/70.0.3538.77 Safari/537.36'
+            # 'Cookie': 'CGIC=IgMqLyo; '
+            #           '1P_JAR=2020-06-06-20; '
+            #           'NID=204=phrZMV6C1pk1e34P2JlDhe_'
+            #           '4jxUPa5N0YfZHoCMGWf7IkRelYkBkN6PPV4eqS27lBktHz'
+            #           'SWTC6xnqUJEVQQ0qC0dDanrpe-2fpRcV9luZfZ8_VdOFLv9'
+            #           'OBp5ixmPpNKOUez3-cMyXD3jAg1uchenXt4wM_uHmTRA5p6YQKIlDl8'
         }
         if not self._check_search_string():
             raise ValueError('Wrong search string')
