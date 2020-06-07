@@ -91,7 +91,7 @@ class GoogleNewsURLDumper:
 
     def __init__(self, search_string, proxy, after=None, before=None):
         self.url = 'https://www.google.ru/search'
-        self.proxy = {'http': proxy}
+        self.proxy = {'https': proxy}
         self.params = {
             'q': '{} {} {}'.format(
                 search_string,
