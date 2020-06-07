@@ -65,6 +65,18 @@ from io import BytesIO
 #         return proxy_url.proxy_url
 
 
+def add_proxy():
+    token = '738fe198fb-6c257969da-c933262191'
+    url = 'https://proxy6.net/api/{}/getproxy'.format(token)
+    req = requests.get(url)
+    data = req.json()['list']
+    for key in data.keys():
+        pr = data[key]
+        if pr['active'] == 1:
+            url = 'https://{}:{}@{}:{}'.format(pr['user'], pr['pass'], pr['host'], pr['port'])
+            yield url
+
+
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
         print(request_text)

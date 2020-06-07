@@ -2,7 +2,7 @@ from flask import Flask, make_response, request
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 import telebot
-from extensions import GoogleNewsURLDumper, check_date
+from extensions import GoogleNewsURLDumper, check_date, add_proxy
 from sqlalchemy.sql.expression import func
 from os import getenv
 
@@ -60,9 +60,15 @@ def help_handler(message):
     bot.send_message(message.chat.id, text=mes, parse_mode='Markdown')
 
 
-# @bot.message_handler(commands=['test'])
-# def test_handler(message):
-#     print(proxy_obj.get_proxy())
+@bot.message_handler(commands=['add_proxy'])
+def test_handler(message):
+    chat_id = message.chat.id
+    db.session.query(Proxy).delete()
+    db.session.commit()
+    for url in add_proxy():
+        db.session.add(Proxy(proxy_url=url))
+        db.session.commit()
+    bot.send_message(chat_id, text='Прокси были добавлены')
 
 
 @bot.message_handler(commands=['find'])
