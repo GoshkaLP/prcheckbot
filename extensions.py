@@ -64,29 +64,29 @@ from io import BytesIO
 #             self.get_proxy()
 #         return proxy_url.proxy_url
 
-    def check_proxy(proxy_url):
-        url = 'https://google.ru/search'
-        proxy = {'https': proxy_url}
-        headers = {
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-                                      'Chrome/70.0.3538.77 Safari/537.36'
-                    }
-        params = {
-            'q': 'google',
-            'tbm': 'nws',
-            'hl': 'ru',
-            'gl': 'ru'
-        }
-        try:
-            req = requests.get(url, headers=headers, params=params, proxies=proxy)
-            soup = BeautifulSoup(req.text, 'lxml')
-            if soup.find('div', class_='g-recaptcha'):
-                print('recaptcha error')
-                return False
-            return True
-        except:
-            print('connection error')
+def check_proxy(proxy_url):
+    url = 'https://google.ru/search'
+    proxy = {'https': proxy_url}
+    headers = {
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+                                  'Chrome/70.0.3538.77 Safari/537.36'
+                }
+    params = {
+        'q': 'google',
+        'tbm': 'nws',
+        'hl': 'ru',
+        'gl': 'ru'
+    }
+    try:
+        req = requests.get(url, headers=headers, params=params, proxies=proxy)
+        soup = BeautifulSoup(req.text, 'lxml')
+        if soup.find('div', class_='g-recaptcha'):
+            print('recaptcha error')
             return False
+        return True
+    except:
+        print('connection error')
+        return False
 
 def add_proxy():
     token = '738fe198fb-6c257969da-c933262191'
