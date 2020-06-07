@@ -50,21 +50,20 @@ class GoogleNewsURLDumper:
             raise ValueError('Wrong search string')
 
     def dump(self):
-        with Session() as s:
-            data = ''
-            flag = True
-            while flag:
-                req = s.get(self.url, params=self.params, headers=self.headers)
-                for url in self._get_data(req.text):
-                    if not url:
-                        flag = False
-                        break
-                    data += '{}\n'.format(url)
-                self.params['start'] += 10
-                sleep(2)
-            if not data:
-                raise ValueError('Empty file')
-            return BytesIO(data.encode())
+        data = ''
+        flag = True
+        while flag:
+            req = requests.get(self.url, params=self.params, headers=self.headers)
+            for url in self._get_data(req.text):
+                if not url:
+                    flag = False
+                    break
+                data += '{}\n'.format(url)
+            self.params['start'] += 10
+            sleep(2)
+        if not data:
+            raise ValueError('Empty file')
+        return BytesIO(data.encode())
 
 
 def check_date(date):

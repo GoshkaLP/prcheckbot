@@ -133,10 +133,7 @@ def text_handler(message):
         if before_date.lower() == 'нет':
             user_upd_obj.update({'mes_status': 3})
             db.session.commit()
-            bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...\n'
-                                           'Между переключениями страниц стоит задержка 2с, чтобы'
-                                           ' `Google` не банил за спам',
-                             parse_mode='Markdown')
+            bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...')
             try:
                 start_dumping(chat_id, user_id)
             except ValueError as e:
@@ -153,10 +150,7 @@ def text_handler(message):
         elif check_date(before_date):
             user_upd_obj.update({'mes_status': 3, 'before_date': before_date})
             db.session.commit()
-            bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...\n'
-                                           'Между переключениями страниц стоит задержка 2с, чтобы'
-                                           ' `Google` не банил за спам',
-                             parse_mode='Markdown')
+            bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...')
             try:
                 start_dumping(chat_id, user_id)
             except ValueError as e:
