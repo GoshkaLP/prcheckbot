@@ -72,7 +72,7 @@ def add_proxy():
     data = req.json()['list']
     for key in data.keys():
         pr = data[key]
-        if pr['active'] == 1:
+        if pr['active'] == '1':
             url = 'https://{}:{}@{}:{}'.format(pr['user'], pr['pass'], pr['host'], pr['port'])
             yield url
 
