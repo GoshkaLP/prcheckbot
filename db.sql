@@ -8,3 +8,9 @@ CREATE TABLE Users (
     before_date VARCHAR(255),
     PRIMARY KEY (id)
 );
+
+CREATE TABLE Proxy (
+    id SERIAL,
+    proxy_url VARCHAR(255),
+    PRIMARY KEY (id)
+);

@@ -3,15 +3,17 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 import telebot
 from extensions import GoogleNewsURLDumper, check_date
+from sqlalchemy.sql.expression import func
 from os import getenv
+
 
 token = '1121674909:AAETzxZPRT-rGziD-AWbfC7EpFTTEf3NY4E'
 app = Flask(__name__)
+db = SQLAlchemy(app)
 app.config.from_object(Config)
 bot = telebot.TeleBot(token)
 bot.remove_webhook()
 secret = 'prcheckbot'
-db = SQLAlchemy(app)
 
 
 class Users(db.Model):
@@ -22,6 +24,12 @@ class Users(db.Model):
     search_string = db.Column(db.String(255))
     after_date = db.Column(db.String(255))
     before_date = db.Column(db.String(255))
+
+
+class Proxy(db.Model):
+    __tablename__ = 'proxy'
+    id = db.Column(db.Integer, primary_key=True)
+    proxy_url = db.Column(db.String(255))
 
 
 @app.route('/ping', methods=['GET', 'HEAD'])
@@ -52,6 +60,11 @@ def help_handler(message):
     bot.send_message(message.chat.id, text=mes, parse_mode='Markdown')
 
 
+# @bot.message_handler(commands=['test'])
+# def test_handler(message):
+#     print(proxy_obj.get_proxy())
+
+
 @bot.message_handler(commands=['find'])
 def find_handler(message):
     user_id = str(message.from_user.id)
@@ -68,9 +81,9 @@ def find_handler(message):
     bot.send_message(chat_id, text='Отправьте поисковый запрос следующим сообщением')
 
 
-def start_dumping(chat_id, user_id):
+def start_dumping(chat_id, user_id, proxy):
     user_obj = Users.query.filter_by(user_id=user_id).first()
-    dump_data = GoogleNewsURLDumper(user_obj.search_string, user_obj.after_date, user_obj.before_date).dump()
+    dump_data = GoogleNewsURLDumper(user_obj.search_string, proxy, user_obj.after_date, user_obj.before_date).dump()
     caption = 'По вашему поисковому запросу новостные ссылки были успешно сохранены в файл'
     bot.send_document(chat_id, data=('file.txt', dump_data), caption=caption)
 
@@ -89,7 +102,7 @@ def text_handler(message):
     if user_obj.mes_status == 0:
         search_string = message.text
         try:
-            GoogleNewsURLDumper(search_string)
+            GoogleNewsURLDumper(search_string, Proxy.query.order_by(func.random()).first().proxy_url)
             user_upd_obj.update({'search_string': search_string, 'mes_status': 1})
             db.session.commit()
             bot.send_message(chat_id, text='Отправьте дату, *с момента которой хотите получить ссылки*\n'
@@ -133,9 +146,11 @@ def text_handler(message):
         if before_date.lower() == 'нет':
             user_upd_obj.update({'mes_status': 3})
             db.session.commit()
+            bot.send_message(chat_id, text='Ищем подходящий прокси-сервер...')
+            proxy = Proxy.query.order_by(func.random()).first().proxy_url
             bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...')
             try:
-                start_dumping(chat_id, user_id)
+                start_dumping(chat_id, user_id, proxy)
             except ValueError as e:
                 if str(e) == 'Too many requests':
                     bot.send_message(chat_id, text='*Произошла ошибка!*\n'
@@ -150,9 +165,11 @@ def text_handler(message):
         elif check_date(before_date):
             user_upd_obj.update({'mes_status': 3, 'before_date': before_date})
             db.session.commit()
+            bot.send_message(chat_id, text='Ищем подходящий прокси-сервер...')
+            proxy = Proxy.query.order_by(func.random()).first().proxy_url
             bot.send_message(chat_id, text='Начат процесс выгрузки ссылок...')
             try:
-                start_dumping(chat_id, user_id)
+                start_dumping(chat_id, user_id, proxy)
             except ValueError as e:
                 if str(e) == 'Too many requests':
                     bot.send_message(chat_id, text='*Произошла ошибка!*\n'
