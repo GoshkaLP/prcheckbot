@@ -63,7 +63,7 @@ def help_handler(message):
 @bot.message_handler(commands=['add_proxy'])
 def test_handler(message):
     chat_id = message.chat.id
-    db.session.query(Proxy).delete()
+    Proxy.query.delete()
     db.session.commit()
     for url in add_proxy():
         db.session.add(Proxy(proxy_url=url))
