@@ -12,7 +12,12 @@ def handler():
     return 'ok', 200
 
 
-@node.route('/{}/check_proxy'.format(secret), methods=['GET'])
+@node.route('/{}/check_proxy'.format(secret), methods=['GET', 'HEAD'])
 def check_proxy_handler():
     ProxyWrapper().add_proxy()
     return 'Done!', 200
+
+
+@node.route('/ping', methods=['GET', 'HEAD'])
+def ping_handler():
+    return 'ok', 200
