@@ -37,8 +37,13 @@ class Psql:
         db_conn.close()
 
 
-db = Psql('ded0kooq5j9ev0', 'ygwmegojzmhmzq', 'cb8a669298aa526c225eb0ba9978b2bcb3d6f5f6b8bceb4e1b46c4a509648eb1',
-          'ec2-54-217-204-34.eu-west-1.compute.amazonaws.com', '5432')
+db = Psql('prcheckbot', 'pradmin', 'a8D2I5iob9oO', '23.111.204.159', '5430')
+
+
+def check_user_db(user_id):
+    flag = next(db.exec("SELECT EXISTS(SELECT user_id FROM Users WHERE user_id='{}')".format(user_id)))[0]
+    if not flag:
+        db.exec("INSERT INTO Users(user_id) VALUES('{}')".format(user_id))
 
 
 class Logs:
@@ -57,7 +62,7 @@ class Logs:
     def add(self):
         username = self._get_username()
         user_id = str(self.user_obj.id)
-        sql_query = "INSERT INTO Users (user_id, username, search_string, after_date, before_date) VALUES ('{}', '{}', '{}', '{}', '{}')".\
+        sql_query = "INSERT INTO Logs (user_id, username, search_string, after_date, before_date) VALUES ('{}', '{}', '{}', '{}', '{}')".\
             format(user_id, username, self.search_string, self.after_date, self.before_date)
         db.exec(sql_query)
 
@@ -65,7 +70,7 @@ class Logs:
         user_id = str(self.user_obj.id)
         flag = next(db.exec("SELECT allow FROM Users WHERE user_id = '{}'".format(user_id)))[0]
         if flag:
-            data = db.exec('SELECT username, search_string, after_date, before_date FROM Users')
+            data = db.exec('SELECT username, search_string, after_date, before_date FROM Logs')
             res = ''
             for row in data:
                 username = row[0]
@@ -264,6 +269,12 @@ class AddMessageParse:
             return token
 
     def check(self):
+        flag1 = next(db.exec("SELECT EXISTS(SELECT token FROM Users WHERE user_id='{}')".format(self.user_id)))[0]
+        if not flag1:
+            raise ValueError('Lack of token')
+        flag2 = next(db.exec("SELECT allow FROM Users WHERE user_id='{}'".format(self.user_id)))[0]
+        if flag2:
+            raise ValueError('Already allowed')
         true_token = next(db.exec("SELECT token FROM Users WHERE user_id = '{}'".format(self.user_id)))[0]
         if true_token == self._get_token():
             db.exec("UPDATE Users SET allow = True WHERE user_id = '{}'".format(self.user_id))

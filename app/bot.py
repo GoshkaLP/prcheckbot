@@ -1,8 +1,9 @@
 import telebot
-from .extensions import GoogleNewsURLDumper, FindMessageParse, ProxyWrapper, Logs, AddMessageParse
+from .extensions import GoogleNewsURLDumper, FindMessageParse, ProxyWrapper, Logs, AddMessageParse, check_user_db
 
 token = '1121674909:AAETzxZPRT-rGziD-AWbfC7EpFTTEf3NY4E'
 webhook_url = 'https://prcheckbot.herokuapp.com'
+# webhook_url = 'https://2a004bfbea47.ngrok.io'
 bot = telebot.TeleBot(token)
 bot.remove_webhook()
 secret = 'prcheckbot'
@@ -12,6 +13,8 @@ proxy_obj = ProxyWrapper()
 @bot.message_handler(commands=['start'])
 def start_handler(message):
     chat_id = message.chat.id
+    user_id = message.from_user.id
+    check_user_db(user_id)
     bot.send_message(chat_id, text='Давайте начнем!\n'
                                    'Для того, чтобы посмотреть список доступных команд, нажмите /help')
 
@@ -19,6 +22,8 @@ def start_handler(message):
 @bot.message_handler(commands=['help'])
 def help_handler(message):
     chat_id = message.chat.id
+    user_id = message.from_user.id
+    check_user_db(user_id)
     mes = '*Доступные команды:*\n' \
           '`/find поисковый_запрос from[YYYY-MM-DD] to[YYYY-MM-DD]` - выгрузка ссылок по поисковому запросу,\n' \
           'где `from[YYYY-MM-DD]` и `to[YYYY-MM-DD]` - опциональные параметры\n' \
@@ -37,6 +42,8 @@ def help_handler(message):
 @bot.message_handler(commands=['find'])
 def find_handler(message):
     chat_id = message.chat.id
+    user_id = message.from_user.id
+    check_user_db(user_id)
     try:
         data = FindMessageParse(message.text).result()
         search_string = data['search_string']
@@ -69,8 +76,10 @@ def find_handler(message):
 @bot.message_handler(commands=['add'])
 def add_handler(message):
     chat_id = message.chat.id
+    user_id = message.from_user.id
+    check_user_db(user_id)
     try:
-        add_obj = AddMessageParse(message.text, message.from_user.id)
+        add_obj = AddMessageParse(message.text, user_id)
         if add_obj.check():
             bot.send_message(chat_id, text='*Вы успешно привязали свой токен!*', parse_mode='Markdown')
         else:
@@ -78,13 +87,20 @@ def add_handler(message):
     except ValueError as e:
         if str(e) == 'No token':
             bot.send_message(chat_id, text='*Ошибка!\nВы не указали свой токен!*', parse_mode='Markdown')
+        elif str(e) == 'Lack of token':
+            bot.send_message(chat_id, text='*Ошибка!\nОбратитесь к администратору за получением токена!*',
+                             parse_mode='Markdown')
+        elif str(e) == 'Already allowed':
+            bot.send_message(chat_id, text='*Ошибка!\nВы уже привязали свой токен!*', parse_mode='Markdown')
 
 
 @bot.message_handler(commands=['logs'])
 def log_handler(message):
     chat_id = message.chat.id
-    bot.send_message(chat_id, text='Пытаемся выгрузить логи...')
+    user_id = message.from_user.id
+    check_user_db(user_id)
     try:
+        bot.send_message(chat_id, text='Пытаемся выгрузить логи...')
         logs = Logs(message.from_user).get()
         caption = 'Логи были успешно выгружены в файл'
         bot.send_document(chat_id, data=('logs.txt', logs), caption=caption)

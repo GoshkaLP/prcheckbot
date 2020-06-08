@@ -1,4 +1,4 @@
 .idea/
 __pycache__/
 app/__pycache__/
-test.py
+docker-compose.yml
