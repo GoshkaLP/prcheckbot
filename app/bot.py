@@ -2,11 +2,11 @@ import telebot
 from telebot import types
 
 from .extensions import GoogleNewsURLDumper, ProxyWrapper, Users, check_user_db, check_date, number_of_users, \
-    get_countries, get_country_code
+    get_countries, get_country_code, get_languages, get_language_code, get_current_date
 
 token = '1039465196:AAFZRdxJxTsxKZIM5Lgb0f_pf-psD7ssfQY'
 # webhook_url = 'https://hrspot.me:1234'
-webhook_url = 'https://8d286fb66513.ngrok.io'
+webhook_url = 'https://994f1b49f77f.ngrok.io'
 bot = telebot.TeleBot(token)
 bot.remove_webhook()
 secret = 'prcheckbot'
@@ -96,15 +96,19 @@ def process_after_date_step(message):
         try:
             check_date(message.text)
             Users(user_id).set_param('after_date', message.text)
-            mes = 'Отправьте дату, *по момент которой* хотите получить ссылки.\n' \
+            mes = 'Нажмите на кнопку *Текущая дата* или отправьте дату, *по момент которой*,' \
+                  'хотите получить ссылки.\n' \
                   'Формат ввода даты: `YYYY-MM-DD`'
-            msg = bot.reply_to(message, mes, parse_mode='Markdown')
+            markup = types.ReplyKeyboardMarkup(one_time_keyboard=False)
+            markup.add('Текущая дата')
+            msg = bot.reply_to(message, mes, parse_mode='Markdown', reply_markup=markup)
             bot.register_next_step_handler(msg, process_before_date_step)
         except ValueError as e:
             if str(e) == 'Wrong date':
                 bot.reply_to(message, text='*Произошла ошибка!\n*'
                                            '*Неверный формат даты!*', parse_mode='Markdown')
     except Exception as er:
+        print(er)
         bot.reply_to(message, text='*Произошла ошибка!\n*'
                                    '*Попробуйте еще раз!*', parse_mode='Markdown')
 
@@ -113,8 +117,11 @@ def process_before_date_step(message):
     try:
         user_id = message.from_user.id
         try:
-            check_date(message.text)
-            Users(user_id).set_param('before_date', message.text)
+            date = message.text
+            if message.text == 'Текущая дата':
+                date = get_current_date()
+            check_date(date)
+            Users(user_id).set_param('before_date', date)
             markup = types.ReplyKeyboardMarkup(one_time_keyboard=False)
             countries = get_countries()
             for country in countries:
@@ -138,7 +145,7 @@ def process_region_step(message):
             country = get_country_code(message.text)
             Users(user_id).set_param('country', country)
             markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
-            languages = get_countries()
+            languages = get_languages()
             for language in languages:
                 markup.add(language[0])
             msg = bot.reply_to(message, text='Выберите язык поиска',
@@ -159,7 +166,7 @@ def process_language_and_search_step(message):
     try:
         user_id = message.from_user.id
         try:
-            language = get_country_code(message.text)
+            language = get_language_code(message.text)
             Users(user_id).set_param('language', language)
             user_params = Users(user_id).get_params()
             markup = types.ReplyKeyboardRemove()
@@ -169,7 +176,7 @@ def process_language_and_search_step(message):
             caption = 'По вашему поисковому запросу новостные ссылки были успешно сохранены в файл'
             bot.send_document(chat_id, data=('file.txt', dump_data), caption=caption)
         except ValueError as e:
-            if str(e) == 'Wrong country':
+            if str(e) == 'Wrong language':
                 bot.reply_to(message, text='*Произошла ошибка!\n*'
                                            '*Неверный язык!*', parse_mode='Markdown')
             elif str(e) == 'Wrong search string':
@@ -194,10 +201,8 @@ def number_users_handler(message):
     user_id = message.from_user.id
     check_user_db(user_id)
     amount = number_of_users()
-    mes = 'Ботом пользуются {} человек'.format(amount)
+    mes = 'Количество пользователей бота: {}'.format(amount)
     bot.send_message(chat_id, text=mes, parse_mode='Markdown')
 
 
-bot.enable_save_next_step_handlers(delay=1)
-bot.load_next_step_handlers()
 bot.set_webhook('{}/{}'.format(webhook_url, secret))

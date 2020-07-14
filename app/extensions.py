@@ -1,9 +1,9 @@
 import requests
 from requests import Session
 import psycopg2
-from time import strptime
+from time import strptime, sleep
+from datetime import datetime
 from bs4 import BeautifulSoup
-from time import sleep
 from io import BytesIO
 
 
@@ -176,6 +176,10 @@ def check_date(date):
         raise ValueError('Wrong date')
 
 
+def get_current_date():
+    return datetime.today().strftime('%Y-%m-%d')
+
+
 def get_countries():
     data = db.exec('SELECT country FROM Countries')
     return data
@@ -185,6 +189,18 @@ def get_country_code(country):
     code = next(db.exec("SELECT country_code FROM Countries WHERE country='{}'".format(country)))[0]
     if not code:
         raise ValueError('Wrong country')
+    return code
+
+
+def get_languages():
+    data = db.exec('SELECT language FROM Languages')
+    return data
+
+
+def get_language_code(country):
+    code = next(db.exec("SELECT language_code FROM Languages WHERE language='{}'".format(country)))[0]
+    if not code:
+        raise ValueError('Wrong language')
     return code
 
 

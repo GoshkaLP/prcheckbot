@@ -21,3 +21,10 @@ CREATE TABLE Countries (
     country_code VARCHAR(255),
     PRIMARY KEY (id)
 );
+
+CREATE TABLE Languages (
+    id SERIAL,
+    language VARCHAR(255),
+    language_code VARCHAR(255),
+    PRIMARY KEY (id)
+);
