@@ -2,3 +2,6 @@
 __pycache__/
 app/__pycache__/
 docker-compose.yml
+langs.txt
+test.py
+test.html

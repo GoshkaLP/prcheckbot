@@ -1,7 +1,6 @@
 import requests
 from requests import Session
 import psycopg2
-import re
 from time import strptime
 from bs4 import BeautifulSoup
 from time import sleep
@@ -46,43 +45,9 @@ def check_user_db(user_id):
         db.exec("INSERT INTO Users(user_id) VALUES('{}')".format(user_id))
 
 
-class Logs:
-    def __init__(self, user_obj, search_string=None, after_date=None, before_date=None):
-        self.user_obj = user_obj
-        self.search_string = search_string
-        self.after_date = after_date
-        self.before_date = before_date
-
-    def _get_username(self):
-        username = self.user_obj.username
-        if not self.user_obj.username:
-            username = '{} {}'.format(self.user_obj.first_name, self.user_obj.last_name)
-        return username
-
-    def add(self):
-        username = self._get_username()
-        user_id = str(self.user_obj.id)
-        sql_query = "INSERT INTO Logs (user_id, username, search_string, after_date, before_date) VALUES ('{}', '{}', '{}', '{}', '{}')".\
-            format(user_id, username, self.search_string, self.after_date, self.before_date)
-        db.exec(sql_query)
-
-    def get(self):
-        user_id = str(self.user_obj.id)
-        flag = next(db.exec("SELECT allow FROM Users WHERE user_id = '{}'".format(user_id)))[0]
-        if flag:
-            data = db.exec('SELECT username, search_string, after_date, before_date FROM Logs')
-            res = ''
-            for row in data:
-                username = row[0]
-                search_string = row[1]
-                after_date = row[2]
-                before_date = row[3]
-                res += '{} searched: {} {} {}\n'.format(username, search_string, after_date, before_date)
-            if not res:
-                raise ValueError('Empty file')
-            return BytesIO(res.encode())
-        else:
-            raise ValueError('Not allowed')
+def number_of_users():
+    result = next(db.exec("SELECT count(*) FROM Users"))[0]
+    return result
 
 
 class ProxyWrapper:
@@ -102,6 +67,7 @@ class ProxyWrapper:
             'hl': 'ru',
             'gl': 'ru'
         }
+
         try:
             req = requests.get(url, headers=self.headers, params=params, proxies=proxy)
             soup = BeautifulSoup(req.text, 'lxml')
@@ -128,10 +94,10 @@ class ProxyWrapper:
 
     def get_proxy(self):
         n = next(db.exec('SELECT COUNT(*) FROM Proxy'))[0]
-        proxy_url = next(db.exec('SELECT proxy_url FROM Proxy OFFSET floor(random()*{}) LIMIT 1'.format(n)))[0]
-        if not proxy_url:
+        if n == 0:
             self.add_proxy()
             self.get_proxy()
+        proxy_url = next(db.exec('SELECT proxy_url FROM Proxy OFFSET floor(random()*{}) LIMIT 1'.format(n)))[0]
         if not self._check_proxy(proxy_url):
             db.exec("DELETE FROM Proxy WHERE proxy_url = '{}'".format(proxy_url))
             self.get_proxy()
@@ -140,6 +106,8 @@ class ProxyWrapper:
 
 class GoogleNewsURLDumper:
     def _get_data(self, request_text):
+        # with open('test.html', 'w') as file:
+        #     file.write(request_text)
         # print(request_text)
         soup = BeautifulSoup(request_text, 'lxml')
         if soup.find('div', class_='g-recaptcha'):
@@ -162,7 +130,7 @@ class GoogleNewsURLDumper:
                 break
         return True
 
-    def __init__(self, search_string, proxy_obj, after=None, before=None):
+    def __init__(self, search_string, proxy_obj, after=None, before=None, language='ru', country='ru'):
         self.url = 'https://www.google.ru/search'
         self.proxy = {'https': proxy_obj.get_proxy()}
         self.params = {
@@ -173,8 +141,8 @@ class GoogleNewsURLDumper:
             ),
             'tbm': 'nws',
             'start': 0,
-            'hl': 'ru',
-            'gl': 'ru'
+            'hl': language,
+            'gl': country
         }
         self.headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
@@ -201,82 +169,36 @@ class GoogleNewsURLDumper:
             return BytesIO(data.encode())
 
 
-class FindMessageParse:
-    def __init__(self, mes):
-        self.mes = mes
-
-    def _check_date(self, date):
-        try:
-            strptime(date, '%Y-%m-%d')
-            return True
-        except ValueError:
-            return False
-
-    def _find_params(self, mes):
-        new_mes = mes
-        after_pattern = re.compile('from\[.{0,10}\]')
-        before_pattern = re.compile('to\[.{0,10}\]')
-        date_pattern = re.compile('\d{4}-\d{2}-\d{2}')
-        after_date = None
-        before_date = None
-        tmp_after = after_pattern.search(new_mes)
-        if tmp_after:
-            date = date_pattern.search(tmp_after.group())
-            if not date:
-                raise ValueError('Wrong date')
-            if self._check_date(date.group()):
-                after_date = date.group()
-                new_mes = re.sub(after_pattern, '', new_mes)
-            else:
-                raise ValueError('Wrong date')
-        tmp_before = before_pattern.search(new_mes)
-        if tmp_before:
-            date = date_pattern.search(tmp_before.group())
-            if not date:
-                raise ValueError('Wrong date')
-            if self._check_date(date.group()):
-                before_date = date.group()
-                new_mes = re.sub(before_pattern, '', new_mes)
-            else:
-                raise ValueError("Wrong date")
-        new_mes = new_mes.strip()
-        if not new_mes:
-            raise ValueError('No search string')
-        return {
-            'search_string': new_mes,
-            'before_date': before_date,
-            'after_date': after_date,
-        }
-
-    def result(self):
-        if self.mes == '/find':
-            raise ValueError('No search string')
-        else:
-            data = self._find_params(self.mes[6:])
-            return data
+def check_date(date):
+    try:
+        strptime(date, '%Y-%m-%d')
+    except ValueError:
+        raise ValueError('Wrong date')
 
 
-class AddMessageParse:
-    def __init__(self, mes, user_id):
-        self.mes = mes
+def get_countries():
+    data = db.exec('SELECT country FROM Countries')
+    return data
+
+
+def get_country_code(country):
+    code = next(db.exec("SELECT country_code FROM Countries WHERE country='{}'".format(country)))[0]
+    if not code:
+        raise ValueError('Wrong country')
+    return code
+
+
+class Users:
+    def __init__(self, user_id):
         self.user_id = user_id
 
-    def _get_token(self):
-        if self.mes == '/add':
-            raise ValueError('No token')
-        else:
-            token = self.mes.split()[1]
-            return token
+    def set_param(self, param_key, param):
+        db.exec("UPDATE Users SET {}='{}' WHERE user_id='{}'".format(param_key, param, self.user_id))
 
-    def check(self):
-        flag1 = next(db.exec("SELECT EXISTS(SELECT token FROM Users WHERE user_id='{}')".format(self.user_id)))[0]
-        if not flag1:
-            raise ValueError('Lack of token')
-        flag2 = next(db.exec("SELECT allow FROM Users WHERE user_id='{}'".format(self.user_id)))[0]
-        if flag2:
-            raise ValueError('Already allowed')
-        true_token = next(db.exec("SELECT token FROM Users WHERE user_id = '{}'".format(self.user_id)))[0]
-        if true_token == self._get_token():
-            db.exec("UPDATE Users SET allow = True WHERE user_id = '{}'".format(self.user_id))
-            return True
-        return False
+    def get_params(self):
+        data = next(db.exec("SELECT search_string, after_date, before_date, country, language FROM Users "
+                            "WHERE user_id='{}'".format(self.user_id)))
+        return data
+
+    def remove_dates(self):
+        db.exec("UPDATE Users SET after_date=NULL, before_date=NULL WHERE user_id='{}'".format(self.user_id))
