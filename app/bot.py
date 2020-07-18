@@ -5,8 +5,7 @@ from .extensions import GoogleNewsURLDumper, ProxyWrapper, Users, check_user_db,
     get_countries, get_country_code, get_languages, get_language_code, get_current_date
 
 token = '1039465196:AAFZRdxJxTsxKZIM5Lgb0f_pf-psD7ssfQY'
-# webhook_url = 'https://hrspot.me:1234'
-webhook_url = 'https://994f1b49f77f.ngrok.io'
+webhook_url = 'https://c6d172e8be08.ngrok.io'
 bot = telebot.TeleBot(token)
 bot.remove_webhook()
 secret = 'prcheckbot'
